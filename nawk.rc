@@ -52,8 +52,8 @@
 #define STR_COMPANY         "Red Hat®, Inc."
 #define STR_TRADEMARK       "™ Red Hat Inc."
 #define STR_PRODUCT         "Nawk: pattern scanning and text processing language"
-#define STR_VERISON         "2007.05.01.0"
-#define CSV_VERISON         2007,5,1,0
+#define STR_VERISON         "2011.08.10.0"
+#define CSV_VERISON         2011,8,10,0
 #define PRIVATE_BUILD       0
 #define PRERELEASE_BUILD    0
 

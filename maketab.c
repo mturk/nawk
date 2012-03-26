@@ -102,7 +102,7 @@ struct xx
 	{ CALL, "call", "call" },
 	{ ARG, "arg", "arg" },
 	{ VARNF, "getnf", "NF" },
-	{ GETLINE, "getline", "getline" },
+	{ GETLINE, "awkgetline", "getline" },
 	{ 0, "", "" },
 };
 
@@ -125,21 +125,24 @@ int main(int argc, char *argv[])
 		names[i] = "";
 
 	if ((fp = fopen("ytab.h", "r")) == NULL) {
-		fprintf(stderr, "maketab can't open ytab.h!\n");
+		fprintf(stderr, "maketab: can't open ytab.h!\n");
 		exit(1);
 	}
 	printf("static char *printname[%d] = {\n", SIZE);
 	i = 0;
 	while (fgets(buf, sizeof buf, fp) != NULL) {
 		n = sscanf(buf, "%1c %s %s %d", &c, def, name, &tok);
-		if (c != '#' || (n != 4 && strcmp(def,"define") != 0))	/* not a valid #define */
-			continue;
+		if (n != 4 || c != '#' || strcmp(def, "define") != 0)
+			continue;	/* not a valid #define */
 		if (tok < FIRSTTOKEN || tok > LASTTOKEN) {
-			/* fprintf(stderr, "maketab funny token %d %s ignored\n", tok, buf); */
+			/* fprintf(stderr, "maketab: funny token %d %s ignored\n", tok, buf); */
 			continue;
 		}
-		names[tok-FIRSTTOKEN] = (char *) malloc(strlen(name)+1);
-		strcpy(names[tok-FIRSTTOKEN], name);
+		names[tok-FIRSTTOKEN] = (char *) strdup(name);
+		if (names[tok-FIRSTTOKEN] == NULL) {
+			fprintf(stderr, "maketab: out of memory\n");
+			exit(1);
+		}
 		printf("\t(char *) \"%s\",\t/* %d */\n", name, tok);
 		i++;
 	}
@@ -159,7 +162,7 @@ int main(int argc, char *argv[])
 	printf("{\n");
 	printf("	static char buf[100];\n\n");
 	printf("	if (n < FIRSTTOKEN || n > LASTTOKEN) {\n");
-	printf("		sprintf(buf, \"token %%d\", n);\n");
+	printf("		snprintf(buf, sizeof buf, \"token %%d\", n);\n");
 	printf("		return buf;\n");
 	printf("	}\n");
 	printf("	return printname[n-FIRSTTOKEN];\n");

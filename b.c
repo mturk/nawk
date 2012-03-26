@@ -84,8 +84,8 @@ fa *makedfa(const char *s, int anchor)	/* returns dfa for reg expr s */
 
 	if (setvec == 0) {	/* first time through any RE */
 		maxsetvec = MAXLIN;
-		setvec = (int *) malloc(maxsetvec * sizeof(int));
-		tmpset = (int *) malloc(maxsetvec * sizeof(int));
+		setvec = (int *) calloc(maxsetvec, sizeof(int));
+		tmpset = (int *) calloc(maxsetvec, sizeof(int));
 		if (setvec == 0 || tmpset == 0)
 			overflo("out of space initializing makedfa");
 	}
@@ -137,7 +137,7 @@ fa *mkdfa(const char *s, int anchor)	/* does the real work of making a dfa */
 	f->accept = poscnt-1;	/* penter has computed number of positions in re */
 	cfoll(f, p1);	/* set up follow sets */
 	freetr(p1);
-	if ((f->posns[0] = (int *) calloc(1, *(f->re[0].lfollow)*sizeof(int))) == NULL)
+	if ((f->posns[0] = (int *) calloc(*(f->re[0].lfollow), sizeof(int))) == NULL)
 			overflo("out of space in makedfa");
 	if ((f->posns[1] = (int *) calloc(1, sizeof(int))) == NULL)
 		overflo("out of space in makedfa");
@@ -157,7 +157,7 @@ int makeinit(fa *f, int anchor)
 	f->reset = 0;
 	k = *(f->re[0].lfollow);
 	xfree(f->posns[2]);			
-	if ((f->posns[2] = (int *) calloc(1, (k+1)*sizeof(int))) == NULL)
+	if ((f->posns[2] = (int *) calloc(k+1, sizeof(int))) == NULL)
 		overflo("out of space in makeinit");
 	for (i=0; i <= k; i++) {
 		(f->posns[2])[i] = (f->re[0].lfollow)[i];
@@ -231,7 +231,7 @@ void freetr(Node *p)	/* free parse tree */
 /* in the parsing of regular expressions, metacharacters like . have */
 /* to be seen literally;  \056 is not a metacharacter. */
 
-int hexstr(char **pp)	/* find and eval hex string at pp, return new p */
+int hexstr(uschar **pp)	/* find and eval hex string at pp, return new p */
 {			/* only pick up one 8-bit byte (2 chars) */
 	uschar *p;
 	int n = 0;
@@ -245,16 +245,16 @@ int hexstr(char **pp)	/* find and eval hex string at pp, return new p */
 		else if (*p >= 'A' && *p <= 'F')
 			n = 16 * n + *p - 'A' + 10;
 	}
-	*pp = (char *) p;
+	*pp = (uschar *) p;
 	return n;
 }
 
 #define isoctdigit(c) ((c) >= '0' && (c) <= '7')	/* multiple use of arg */
 
-int quoted(char **pp)	/* pick up next thing after a \\ */
+int quoted(uschar **pp)	/* pick up next thing after a \\ */
 			/* and increment *pp */
 {
-	char *p = *pp;
+	uschar *p = *pp;
 	int c;
 
 	if ((c = *p++) == 't')
@@ -299,13 +299,13 @@ char *cclenter(const char *argp)	/* add a character class */
 	bp = buf;
 	for (i = 0; (c = *p++) != 0; ) {
 		if (c == '\\') {
-			c = quoted((char **) &p);
+			c = quoted(&p);
 		} else if (c == '-' && i > 0 && bp[-1] != 0) {
 			if (*p != 0) {
 				c = bp[-1];
 				c2 = *p++;
 				if (c2 == '\\')
-					c2 = quoted((char **) &p);
+					c2 = quoted(&p);
 				if (c > c2) {	/* empty; ignore */
 					bp--;
 					i--;
@@ -357,7 +357,7 @@ void cfoll(fa *f, Node *v)	/* enter follow set of each leaf of vertex v into lfo
 			setvec[i] = 0;
 		setcnt = 0;
 		follow(v);	/* computes setvec and setcnt */
-		if ((p = (int *) calloc(1, (setcnt+1)*sizeof(int))) == NULL)
+		if ((p = (int *) calloc(setcnt+1, sizeof(int))) == NULL)
 			overflo("out of space building follow set");
 		f->re[info(v)].lfollow = p;
 		*p = setcnt;
@@ -531,7 +531,7 @@ int pmatch(fa *f, const char *p0)	/* longest match, for sub */
 			for (i = 2; i <= f->curstat; i++)
 				xfree(f->posns[i]);
 			k = *f->posns[0];			
-			if ((f->posns[2] = (int *) calloc(1, (k+1)*sizeof(int))) == NULL)
+			if ((f->posns[2] = (int *) calloc(k+1, sizeof(int))) == NULL)
 				overflo("out of space in pmatch");
 			for (i = 0; i <= k; i++)
 				(f->posns[2])[i] = (f->posns[0])[i];
@@ -588,7 +588,7 @@ int nematch(fa *f, const char *p0)	/* non-empty match, for sub */
 			for (i = 2; i <= f->curstat; i++)
 				xfree(f->posns[i]);
 			k = *f->posns[0];			
-			if ((f->posns[2] = (int *) calloc(1, (k+1)*sizeof(int))) == NULL)
+			if ((f->posns[2] = (int *) calloc(k+1, sizeof(int))) == NULL)
 				overflo("out of state space");
 			for (i = 0; i <= k; i++)
 				(f->posns[2])[i] = (f->posns[0])[i];
@@ -733,7 +733,7 @@ Node *unary(Node *np)
 
 #ifndef HAS_ISBLANK
 
-int (isblank)(int c)
+int (xisblank)(int c)
 {
 	return c==' ' || c=='\t';
 }
@@ -747,7 +747,11 @@ struct charclass {
 } charclasses[] = {
 	{ "alnum",	5,	isalnum },
 	{ "alpha",	5,	isalpha },
+#ifndef HAS_ISBLANK
+	{ "blank",	5,	isspace }, /* was isblank */
+#else
 	{ "blank",	5,	isblank },
+#endif
 	{ "cntrl",	5,	iscntrl },
 	{ "digit",	5,	isdigit },
 	{ "graph",	5,	isgraph },
@@ -784,7 +788,7 @@ int relex(void)		/* lexical analyzer for reparse */
 	case ')':
 		return c;
 	case '\\':
-		rlxval = quoted((char **) &prestr);
+		rlxval = quoted(&prestr);
 		return CHAR;
 	default:
 		rlxval = c;
@@ -876,7 +880,7 @@ int cgoto(fa *f, int s, int c)
 					if (q[j] >= maxsetvec) {
 						maxsetvec *= 4;
 						setvec = (int *) realloc(setvec, maxsetvec * sizeof(int));
-						tmpset = (int *) realloc(setvec, maxsetvec * sizeof(int));
+						tmpset = (int *) realloc(tmpset, maxsetvec * sizeof(int));
 						if (setvec == 0 || tmpset == 0)
 							overflo("cgoto overflow");
 					}
@@ -920,7 +924,7 @@ int cgoto(fa *f, int s, int c)
 	for (i = 0; i < NCHARS; i++)
 		f->gototab[f->curstat][i] = 0;
 	xfree(f->posns[f->curstat]);
-	if ((p = (int *) calloc(1, (setcnt+1)*sizeof(int))) == NULL)
+	if ((p = (int *) calloc(setcnt+1, sizeof(int))) == NULL)
 		overflo("out of space in cgoto");
 
 	f->posns[f->curstat] = p;

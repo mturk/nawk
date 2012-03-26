@@ -47,9 +47,11 @@ Keyword keywords[] ={	/* keep sorted: binary searched */
 	{ "BEGIN",	XBEGIN,		XBEGIN },
 	{ "END",	XEND,		XEND },
 	{ "NF",		VARNF,		VARNF },
+	{ "and",	FAND,		BLTIN },
 	{ "atan2",	FATAN,		BLTIN },
 	{ "break",	BREAK,		BREAK },
 	{ "close",	CLOSE,		CLOSE },
+	{ "compl",	FCOMPL,		BLTIN },
 	{ "continue",	CONTINUE,	CONTINUE },
 	{ "cos",	FCOS,		BLTIN },
 	{ "delete",	DELETE,		DELETE },
@@ -69,13 +71,16 @@ Keyword keywords[] ={	/* keep sorted: binary searched */
 	{ "int",	FINT,		BLTIN },
 	{ "length",	FLENGTH,	BLTIN },
 	{ "log",	FLOG,		BLTIN },
+	{ "lshift",	FLSHIFT,	BLTIN },
 	{ "match",	MATCHFCN,	MATCHFCN },
 	{ "next",	NEXT,		NEXT },
 	{ "nextfile",	NEXTFILE,	NEXTFILE },
+	{ "or",		FFOR,		BLTIN },
 	{ "print",	PRINT,		PRINT },
 	{ "printf",	PRINTF,		PRINTF },
 	{ "rand",	FRAND,		BLTIN },
 	{ "return",	RETURN,		RETURN },
+	{ "rshift",	FRSHIFT,	BLTIN },
 	{ "sin",	FSIN,		BLTIN },
 	{ "split",	SPLIT,		SPLIT },
 	{ "sprintf",	SPRINTF,	SPRINTF },
@@ -87,9 +92,14 @@ Keyword keywords[] ={	/* keep sorted: binary searched */
 	{ "tolower",	FTOLOWER,	BLTIN },
 	{ "toupper",	FTOUPPER,	BLTIN },
 	{ "while",	WHILE,		WHILE },
+	{ "xor",	FXOR,		BLTIN },
 };
 
 #define	RET(x)	{ if(dbg)printf("lex %s\n", tokname(x)); return(x); }
+
+int peek(void);
+int gettok(char **, int *);
+int binsearch(char *, Keyword *, int);
 
 int peek(void)
 {
@@ -411,7 +421,7 @@ int string(void)
 				}
 				*px = 0;
 				unput(c);
-	  			sscanf(xbuf, "%x", &n);
+	  			sscanf(xbuf, "%x", (unsigned int *) &n);
 				*bp++ = n;
 				break;
 			    }
@@ -503,7 +513,7 @@ void startreg(void)	/* next call to yylex will return a regular expression */
 
 int regexpr(void)
 {
-	int c;
+	int c, openclass = 0;
 	static char *buf = 0;
 	static int bufsz = 500;
 	char *bp;
@@ -511,7 +521,7 @@ int regexpr(void)
 	if (buf == 0 && (buf = (char *) malloc(bufsz)) == NULL)
 		FATAL("out of space for rex expr");
 	bp = buf;
-	for ( ; (c = input()) != '/' && c != 0; ) {
+	for ( ; ((c = input()) != '/' || openclass == 1) && c != 0; ) {
 		if (!adjbuf(&buf, &bufsz, bp-buf+3, 500, &bp, "regexpr"))
 			FATAL("out of space for reg expr %.10s...", buf);
 		if (c == '\n') {
@@ -522,6 +532,10 @@ int regexpr(void)
 			*bp++ = '\\'; 
 			*bp++ = input();
 		} else {
+			if (c == '[')
+				openclass = 1;
+			else if (c == ']')
+				openclass = 0;
 			*bp++ = c;
 		}
 	}

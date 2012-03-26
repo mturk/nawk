@@ -22,7 +22,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-const char	*version = "version 20070501 (RedHat)";
+const char	*version = "version 20110810 (RedHat)";
 
 #define DEBUG
 #include <stdio.h>
@@ -37,6 +37,7 @@ const char	*version = "version 20070501 (RedHat)";
 extern	int	nfields;
 
 int	dbg	= 0;
+Awkfloat	srand_seed = 1;
 char	*cmdname;	/* gets argv[0] for error messages */
 extern	FILE	*yyin;	/* lex input file */
 char	*lexprog;	/* points to program argument if it exists */
@@ -52,29 +53,25 @@ int	curpfile = 0;	/* current filename */
 
 int	safe	= 0;	/* 1 => "safe" mode */
 
-int main(int argc, char *argv[], char *envp[])
+int main(int argc, char *argv[])
 {
 	const char *fs = NULL;
 
-	setlocale(LC_CTYPE, "");
+	setlocale(LC_ALL, "");
 	setlocale(LC_NUMERIC, "C"); /* for parsing cmdline & prog */
 	cmdname = argv[0];
 	if (argc == 1) {
-		fprintf(stderr, 
-		  "usage: %s [-F fs] [-v var=value] [-f progfile | 'prog'] [file ...]\n", 
-		  cmdname);
+		fprintf(stderr, "usage: %s [-safe] [-V] [-d[n]] [-F fs] "
+		    "[-v var=value] [prog | -f progfile]\n\tfile ...\n",
+		    cmdname);
 		exit(1);
 	}
 	signal(SIGFPE, fpecatch);
+
 	yyin = NULL;
-	symtab = makesymtab(NSYMTAB/NSYMTAB);
+	symtab = makesymtab(NSYMTAB);
 	while (argc > 1 && argv[1][0] == '-' && argv[1][1] != '\0') {
-		if (strcmp(argv[1],"-version") == 0 || strcmp(argv[1],"--version") == 0) {
-			printf("awk %s\n", version);
-			exit(0);
-			break;
-		}
-		if (strncmp(argv[1], "--", 2) == 0) {	/* explicit end of args */
+		if (strcmp(argv[1], "--") == 0) {	/* explicit end of args */
 			argc--;
 			argv++;
 			break;
@@ -85,13 +82,18 @@ int main(int argc, char *argv[], char *envp[])
 				safe = 1;
 			break;
 		case 'f':	/* next argument is program filename */
-			argc--;
-			argv++;
-			if (argc <= 1)
-				FATAL("no program filename");
-			if (npfile >= MAX_PFILE - 1)
-				FATAL("too many -f options"); 
-			pfile[npfile++] = argv[1];
+			if (argv[1][2] != 0) {  /* arg is -fsomething */
+				if (npfile >= MAX_PFILE - 1)
+					FATAL("too many -f options"); 
+				pfile[npfile++] = &argv[1][2];
+			} else {		/* arg is -f something */
+				argc--; argv++;
+				if (argc <= 1)
+					FATAL("no program filename");
+				if (npfile >= MAX_PFILE - 1)
+					FATAL("too many -f options"); 
+				pfile[npfile++] = argv[1];
+			}
 			break;
 		case 'F':	/* set field separator */
 			if (argv[1][2] != 0) {	/* arg is -Fsomething */
@@ -110,14 +112,30 @@ int main(int argc, char *argv[], char *envp[])
 				WARNING("field separator FS is empty");
 			break;
 		case 'v':	/* -v a=1 to be done NOW.  one -v for each */
-			if (argv[1][2] == '\0' && --argc > 1 && isclvar((++argv)[1]))
-				setclvar(argv[1]);
+			if (argv[1][2] != 0) {  /* arg is -vsomething */
+				if (isclvar(&argv[1][2]))
+					setclvar(&argv[1][2]);
+				else
+					FATAL("invalid -v option argument: %s", &argv[1][2]);
+			} else {		/* arg is -v something */
+				argc--; argv++;
+				if (argc <= 1)
+					FATAL("no variable name");
+				if (isclvar(argv[1]))
+					setclvar(argv[1]);
+				else
+					FATAL("invalid -v option argument: %s", argv[1]);
+			}
 			break;
 		case 'd':
 			dbg = atoi(&argv[1][2]);
 			if (dbg == 0)
 				dbg = 1;
 			printf("awk %s\n", version);
+			break;
+		case 'V':	/* added for exptools "standard" */
+			printf("awk %s\n", version);
+			exit(0);
 			break;
 		default:
 			WARNING("unknown option %s ignored", argv[1]);
@@ -145,7 +163,7 @@ int main(int argc, char *argv[], char *envp[])
 	   dprintf( ("argc=%d, argv[0]=%s\n", argc, argv[0]) );
 	arginit(argc, argv);
 	if (!safe)
-		envinit(envp);
+		envinit(_environ);
 	yyparse();
 	setlocale(LC_NUMERIC, ""); /* back to whatever it is locally */
 	if (fs)
