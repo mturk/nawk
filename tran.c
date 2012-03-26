@@ -364,6 +364,7 @@ static char *get_str_val(Cell *vp, char **fmt)        /* get string val of a Cel
 {
 	int n;
 	double dtemp;
+	char s[100];
 
 	if ((vp->tval & (NUM | STR)) == 0)
 		funnyvar(vp, "read value of");
@@ -375,11 +376,12 @@ static char *get_str_val(Cell *vp, char **fmt)        /* get string val of a Cel
 		if (freeable(vp))
 			xfree(vp->sval);
 		if (modf(vp->fval, &dtemp) == 0)	/* it's integral */
-			n = asprintf(&vp->sval, "%.30g", vp->fval);
+			n = snprintf(s, sizeof(s), "%.30g", vp->fval);
 		else
-			n = asprintf(&vp->sval, *fmt, vp->fval);
+			n = snprintf(s, sizeof(s), *fmt, vp->fval);
 		if (n == -1)
 			FATAL("out of space in get_str_val");
+		vp->sval = strdup(s);
 		vp->tval &= ~DONTFREE;
 		vp->tval |= STR;
 	}

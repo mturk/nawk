@@ -29,6 +29,9 @@ THIS SOFTWARE.
 #include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#if defined(_WIN32)
+# include <io.h>
+#endif
 #include "awk.h"
 #include "ytab.h"
 
