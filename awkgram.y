@@ -50,9 +50,9 @@ Node	*arglist = 0;	/* list of args for current function */
 %token	<i>	NL ',' '{' '(' '|' ';' '/' ')' '}' '[' ']'
 %token	<i>	ARRAY
 %token	<i>	MATCH NOTMATCH MATCHOP
-%token	<i>	FINAL DOT ALL CCL NCCL CHAR OR STAR QUEST PLUS EMPTYRE
-%token	<i>	AND BOR APPEND EQ GE GT LE LT NE IN
-%token	<i>	ARG BLTIN BREAK CLOSE CONTINUE DELETE DO EXIT FOR FUNC 
+%token	<i>	FINAL DOT ALL CCL NCCL TOKEN_CHAR OR STAR QUEST PLUS EMPTYRE
+%token	<i>	AND BOR APPEND EQ GE GT LE LT NE TOKEN_IN
+%token	<i>	ARG BLTIN BREAK CLOSE CONTINUE TOKEN_DELETE DO EXIT FOR FUNC
 %token	<i>	SUB GSUB IF INDEX LSUBSTR MATCHFCN NEXT NEXTFILE
 %token	<i>	ADD MINUS MULT DIVIDE MOD
 %token	<i>	ASSIGN ASGNOP ADDEQ SUBEQ MULTEQ DIVEQ MODEQ POWEQ
@@ -78,8 +78,8 @@ Node	*arglist = 0;	/* list of args for current function */
 %left	BOR
 %left	AND
 %left	GETLINE
-%nonassoc APPEND EQ GE GT LE LT NE MATCHOP IN '|'
-%left	ARG BLTIN BREAK CALL CLOSE CONTINUE DELETE DO EXIT FOR FUNC 
+%nonassoc APPEND EQ GE GT LE LT NE MATCHOP TOKEN_IN '|'
+%left	ARG BLTIN BREAK CALL CLOSE CONTINUE TOKEN_DELETE DO EXIT FOR FUNC
 %left	GSUB IF INDEX LSUBSTR MATCHFCN NEXT NUMBER
 %left	PRINT PRINTF RETURN SPLIT SPRINTF STRING SUB SUBSTR
 %left	REGEXPR VAR VARNF IVAR WHILE '('
@@ -125,8 +125,8 @@ for:
 		{ --inloop; $$ = stat4(FOR, $3, notnull($6), $9, $12); }
 	| FOR '(' opt_simple_stmt ';'  ';' opt_nl opt_simple_stmt rparen {inloop++;} stmt
 		{ --inloop; $$ = stat4(FOR, $3, NIL, $7, $10); }
-	| FOR '(' varname IN varname rparen {inloop++;} stmt
-		{ --inloop; $$ = stat3(IN, $3, makearr($5), $8); }
+	| FOR '(' varname TOKEN_IN varname rparen {inloop++;} stmt
+		{ --inloop; $$ = stat3(TOKEN_IN, $3, makearr($5), $8); }
 	;
 
 funcname:
@@ -209,8 +209,8 @@ ppattern:
 			$$ = op3($2, NIL, $1, (Node*)makedfa(strnode($3), 0));
 		  else
 			$$ = op3($2, (Node *)1, $1, $3); }
-	| ppattern IN varname		{ $$ = op2(INTEST, $1, makearr($3)); }
-	| '(' plist ')' IN varname	{ $$ = op2(INTEST, $2, makearr($5)); }
+	| ppattern TOKEN_IN varname		{ $$ = op2(INTEST, $1, makearr($3)); }
+	| '(' plist ')' TOKEN_IN varname	{ $$ = op2(INTEST, $2, makearr($5)); }
 	| ppattern term %prec CAT	{ $$ = op2(CAT, $1, $2); }
 	| re
 	| term
@@ -236,12 +236,12 @@ pattern:
 			$$ = op3($2, NIL, $1, (Node*)makedfa(strnode($3), 0));
 		  else
 			$$ = op3($2, (Node *)1, $1, $3); }
-	| pattern IN varname		{ $$ = op2(INTEST, $1, makearr($3)); }
-	| '(' plist ')' IN varname	{ $$ = op2(INTEST, $2, makearr($5)); }
-	| pattern '|' GETLINE var	{ 
+	| pattern TOKEN_IN varname		{ $$ = op2(INTEST, $1, makearr($3)); }
+	| '(' plist ')' TOKEN_IN varname	{ $$ = op2(INTEST, $2, makearr($5)); }
+	| pattern '|' GETLINE var	{
 			if (safe) SYNTAX("cmd | getline is unsafe");
 			else $$ = op3(GETLINE, $4, itonp($2), $1); }
-	| pattern '|' GETLINE		{ 
+	| pattern '|' GETLINE		{
 			if (safe) SYNTAX("cmd | getline is unsafe");
 			else $$ = op3(GETLINE, (Node*)0, itonp($2), $1); }
 	| pattern term %prec CAT	{ $$ = op2(CAT, $1, $2); }
@@ -292,7 +292,7 @@ rparen:
 	;
 
 simple_stmt:
-	  print prarg '|' term		{ 
+	  print prarg '|' term		{
 			if (safe) SYNTAX("print | is unsafe");
 			else $$ = stat3($1, $2, itonp($3), $4); }
 	| print prarg APPEND term	{
@@ -302,8 +302,8 @@ simple_stmt:
 			if (safe) SYNTAX("print > is unsafe");
 			else $$ = stat3($1, $2, itonp($3), $4); }
 	| print prarg			{ $$ = stat3($1, $2, NIL, NIL); }
-	| DELETE varname '[' patlist ']' { $$ = stat2(DELETE, makearr($2), $4); }
-	| DELETE varname		 { $$ = stat2(DELETE, makearr($2), 0); }
+	| TOKEN_DELETE varname '[' patlist ']' { $$ = stat2(TOKEN_DELETE, makearr($2), $4); }
+	| TOKEN_DELETE varname		 { $$ = stat2(TOKEN_DELETE, makearr($2), 0); }
 	| pattern			{ $$ = exptostat($1); }
 	| error				{ yyclearin; SYNTAX("illegal statement"); }
 	;
@@ -421,7 +421,7 @@ var:
 	| varname '[' patlist ']'	{ $$ = op2(ARRAY, makearr($1), $3); }
 	| IVAR				{ $$ = op1(INDIRECT, celltonode($1, CVAR)); }
 	| INDIRECT term	 		{ $$ = op1(INDIRECT, $2); }
-	;	
+	;
 
 varlist:
 	  /* nothing */		{ arglist = $$ = 0; }

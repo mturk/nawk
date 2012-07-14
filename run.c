@@ -517,7 +517,7 @@ Cell *awkdelete(Node **a, int n)	/* a[0] is symtab, a[1] is list of subscripts *
 			s = getsval(y);
 			if (!adjbuf(&buf, &bufsz, strlen(buf)+strlen(s)+nsub+1, recsize, 0, "awkdelete"))
 				FATAL("out of memory deleting %s[%s...]", x->nval, buf);
-			strlcat(buf, s, bufsz);	
+			strlcat(buf, s, bufsz);
 			if (np->nnext)
 				strlcat(buf, *SUBSEP, bufsz);
 			tempfree(y);
@@ -1755,16 +1755,16 @@ FILE *openfile(int a, const char *us)
 	fflush(stdout);	/* force a semblance of order */
 	m = a;
 	if (a == GT) {
-		fp = fopen(s, "w");
+		fp = ufopen(s, "w");
 	} else if (a == APPEND) {
-		fp = fopen(s, "a");
+		fp = ufopen(s, "a");
 		m = GT;	/* so can mix > and >> */
 	} else if (a == '|') {	/* output pipe */
-		fp = popen(s, "w");
+		fp = upopen(s, "w");
 	} else if (a == LE) {	/* input pipe */
-		fp = popen(s, "r");
+		fp = upopen(s, "r");
 	} else if (a == LT) {	/* getline <file */
-		fp = strcmp(s, "-") == 0 ? stdin : fopen(s, "r");	/* "-" is stdin */
+		fp = strcmp(s, "-") == 0 ? stdin : ufopen(s, "r");	/* "-" is stdin */
 	} else	/* can't happen */
 		FATAL("illegal redirection %d", a);
 	if (fp != NULL) {
@@ -1805,7 +1805,7 @@ Cell *closefile(Node **a, int n)
 			if (stat == EOF)
 				WARNING( "i/o error occurred closing %s", files[i].fname );
 			if (i > 2)	/* don't do /dev/std... */
-				xfree(files[i].fname);
+				xfree((char *)files[i].fname);
 			files[i].fname = NULL;	/* watch out for ref thru this */
 			files[i].fp = NULL;
 		}

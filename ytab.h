@@ -54,7 +54,7 @@
      ALL = 271,
      CCL = 272,
      NCCL = 273,
-     CHAR = 274,
+     TOKEN_CHAR = 274,
      OR = 275,
      STAR = 276,
      QUEST = 277,
@@ -69,13 +69,13 @@
      LE = 286,
      LT = 287,
      NE = 288,
-     IN = 289,
+     TOKEN_IN = 289,
      ARG = 290,
      BLTIN = 291,
      BREAK = 292,
      CLOSE = 293,
      CONTINUE = 294,
-     DELETE = 295,
+     TOKEN_DELETE = 295,
      DO = 296,
      EXIT = 297,
      FOR = 298,
@@ -150,7 +150,7 @@
 #define ALL 271
 #define CCL 272
 #define NCCL 273
-#define CHAR 274
+#define TOKEN_CHAR 274
 #define OR 275
 #define STAR 276
 #define QUEST 277
@@ -165,13 +165,13 @@
 #define LE 286
 #define LT 287
 #define NE 288
-#define IN 289
+#define TOKEN_IN 289
 #define ARG 290
 #define BLTIN 291
 #define BREAK 292
 #define CLOSE 293
 #define CONTINUE 294
-#define DELETE 295
+#define TOKEN_DELETE 295
 #define DO 296
 #define EXIT 297
 #define FOR 298

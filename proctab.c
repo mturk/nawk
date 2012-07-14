@@ -19,7 +19,7 @@ static char *printname[93] = {
 	(char *) "ALL",	/* 271 */
 	(char *) "CCL",	/* 272 */
 	(char *) "NCCL",	/* 273 */
-	(char *) "CHAR",	/* 274 */
+	(char *) "TOKEN_CHAR",	/* 274 */
 	(char *) "OR",	/* 275 */
 	(char *) "STAR",	/* 276 */
 	(char *) "QUEST",	/* 277 */
@@ -34,13 +34,13 @@ static char *printname[93] = {
 	(char *) "LE",	/* 286 */
 	(char *) "LT",	/* 287 */
 	(char *) "NE",	/* 288 */
-	(char *) "IN",	/* 289 */
+	(char *) "TOKEN_IN",	/* 289 */
 	(char *) "ARG",	/* 290 */
 	(char *) "BLTIN",	/* 291 */
 	(char *) "BREAK",	/* 292 */
 	(char *) "CLOSE",	/* 293 */
 	(char *) "CONTINUE",	/* 294 */
-	(char *) "DELETE",	/* 295 */
+	(char *) "TOKEN_DELETE",	/* 295 */
 	(char *) "DO",	/* 296 */
 	(char *) "EXIT",	/* 297 */
 	(char *) "FOR",	/* 298 */
@@ -116,7 +116,7 @@ Cell *(*proctab[93])(Node **, int) = {
 	nullproc,	/* ALL */
 	nullproc,	/* CCL */
 	nullproc,	/* NCCL */
-	nullproc,	/* CHAR */
+	nullproc,	/* TOKEN_CHAR */
 	nullproc,	/* OR */
 	nullproc,	/* STAR */
 	nullproc,	/* QUEST */
@@ -131,13 +131,13 @@ Cell *(*proctab[93])(Node **, int) = {
 	relop,	/* LE */
 	relop,	/* LT */
 	instat,	/* NE */
-	arg,	/* IN */
+	arg,	/* TOKEN_IN */
 	bltin,	/* ARG */
 	jump,	/* BLTIN */
 	closefile,	/* BREAK */
 	jump,	/* CLOSE */
 	awkdelete,	/* CONTINUE */
-	dostat,	/* DELETE */
+	dostat,	/* TOKEN_DELETE */
 	jump,	/* DO */
 	forstat,	/* EXIT */
 	nullproc,	/* FOR */

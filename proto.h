@@ -191,5 +191,11 @@ extern	void	closeall(void);
 extern	Cell	*sub(Node **, int);
 extern	Cell	*gsub(Node **, int);
 
-extern	FILE	*popen(const char *, const char *);
-extern	int	pclose(FILE *);
+extern	int	     pclose(FILE *);
+extern  size_t   strlcat(char *, const char *, size_t);
+extern  size_t   strlcpy(char *, const char *, size_t);
+extern  FILE    *ufopen(const char *, const char *);
+extern  FILE    *upopen(const char *, const char *);
+extern  void    *xmalloc(size_t);
+extern  char    *xucsdup(const wchar_t *);
+extern  void     xfree(void *);

@@ -128,7 +128,7 @@ Node	*arglist = 0;	/* list of args for current function */
      ALL = 271,
      CCL = 272,
      NCCL = 273,
-     CHAR = 274,
+     TOKEN_CHAR = 274,
      OR = 275,
      STAR = 276,
      QUEST = 277,
@@ -143,13 +143,13 @@ Node	*arglist = 0;	/* list of args for current function */
      LE = 286,
      LT = 287,
      NE = 288,
-     IN = 289,
+     TOKEN_IN = 289,
      ARG = 290,
      BLTIN = 291,
      BREAK = 292,
      CLOSE = 293,
      CONTINUE = 294,
-     DELETE = 295,
+     TOKEN_DELETE = 295,
      DO = 296,
      EXIT = 297,
      FOR = 298,
@@ -224,7 +224,7 @@ Node	*arglist = 0;	/* list of args for current function */
 #define ALL 271
 #define CCL 272
 #define NCCL 273
-#define CHAR 274
+#define TOKEN_CHAR 274
 #define OR 275
 #define STAR 276
 #define QUEST 277
@@ -239,13 +239,13 @@ Node	*arglist = 0;	/* list of args for current function */
 #define LE 286
 #define LT 287
 #define NE 288
-#define IN 289
+#define TOKEN_IN 289
 #define ARG 290
 #define BLTIN 291
 #define BREAK 292
 #define CLOSE 293
 #define CONTINUE 294
-#define DELETE 295
+#define TOKEN_DELETE 295
 #define DO 296
 #define EXIT 297
 #define FOR 298
@@ -738,24 +738,24 @@ static const char *const yytname[] =
   "$end", "error", "$undefined", "FIRSTTOKEN", "PROGRAM", "PASTAT",
   "PASTAT2", "XBEGIN", "XEND", "NL", "','", "'{'", "'('", "'|'", "';'",
   "'/'", "')'", "'}'", "'['", "']'", "ARRAY", "MATCH", "NOTMATCH",
-  "MATCHOP", "FINAL", "DOT", "ALL", "CCL", "NCCL", "CHAR", "OR", "STAR",
-  "QUEST", "PLUS", "EMPTYRE", "AND", "BOR", "APPEND", "EQ", "GE", "GT",
-  "LE", "LT", "NE", "IN", "ARG", "BLTIN", "BREAK", "CLOSE", "CONTINUE",
-  "DELETE", "DO", "EXIT", "FOR", "FUNC", "SUB", "GSUB", "IF", "INDEX",
-  "LSUBSTR", "MATCHFCN", "NEXT", "NEXTFILE", "ADD", "MINUS", "MULT",
-  "DIVIDE", "MOD", "ASSIGN", "ASGNOP", "ADDEQ", "SUBEQ", "MULTEQ", "DIVEQ",
-  "MODEQ", "POWEQ", "PRINT", "PRINTF", "SPRINTF", "ELSE", "INTEST",
-  "CONDEXPR", "POSTINCR", "PREINCR", "POSTDECR", "PREDECR", "VAR", "IVAR",
-  "VARNF", "CALL", "NUMBER", "STRING", "REGEXPR", "'?'", "':'", "GETLINE",
-  "SUBSTR", "SPLIT", "RETURN", "WHILE", "CAT", "'+'", "'-'", "'*'", "'%'",
-  "UMINUS", "NOT", "POWER", "INCR", "DECR", "INDIRECT", "LASTTOKEN",
-  "$accept", "program", "and", "bor", "comma", "do", "else", "for", "$@1",
-  "$@2", "$@3", "funcname", "if", "lbrace", "nl", "opt_nl", "opt_pst",
-  "opt_simple_stmt", "pas", "pa_pat", "pa_stat", "$@4", "pa_stats",
-  "patlist", "ppattern", "pattern", "plist", "pplist", "prarg", "print",
-  "pst", "rbrace", "re", "reg_expr", "$@5", "rparen", "simple_stmt", "st",
-  "stmt", "$@6", "$@7", "$@8", "stmtlist", "subop", "term", "var",
-  "varlist", "varname", "while", 0
+  "MATCHOP", "FINAL", "DOT", "ALL", "CCL", "NCCL", "TOKEN_CHAR", "OR",
+  "STAR", "QUEST", "PLUS", "EMPTYRE", "AND", "BOR", "APPEND", "EQ", "GE",
+  "GT", "LE", "LT", "NE", "TOKEN_IN", "ARG", "BLTIN", "BREAK", "CLOSE",
+  "CONTINUE", "TOKEN_DELETE", "DO", "EXIT", "FOR", "FUNC", "SUB", "GSUB",
+  "IF", "INDEX", "LSUBSTR", "MATCHFCN", "NEXT", "NEXTFILE", "ADD", "MINUS",
+  "MULT", "DIVIDE", "MOD", "ASSIGN", "ASGNOP", "ADDEQ", "SUBEQ", "MULTEQ",
+  "DIVEQ", "MODEQ", "POWEQ", "PRINT", "PRINTF", "SPRINTF", "ELSE",
+  "INTEST", "CONDEXPR", "POSTINCR", "PREINCR", "POSTDECR", "PREDECR",
+  "VAR", "IVAR", "VARNF", "CALL", "NUMBER", "STRING", "REGEXPR", "'?'",
+  "':'", "GETLINE", "SUBSTR", "SPLIT", "RETURN", "WHILE", "CAT", "'+'",
+  "'-'", "'*'", "'%'", "UMINUS", "NOT", "POWER", "INCR", "DECR",
+  "INDIRECT", "LASTTOKEN", "$accept", "program", "and", "bor", "comma",
+  "do", "else", "for", "$@1", "$@2", "$@3", "funcname", "if", "lbrace",
+  "nl", "opt_nl", "opt_pst", "opt_simple_stmt", "pas", "pa_pat", "pa_stat",
+  "$@4", "pa_stats", "patlist", "ppattern", "pattern", "plist", "pplist",
+  "prarg", "print", "pst", "rbrace", "re", "reg_expr", "$@5", "rparen",
+  "simple_stmt", "st", "stmt", "$@6", "$@7", "$@8", "stmtlist", "subop",
+  "term", "var", "varlist", "varname", "while", 0
 };
 #endif
 
@@ -2794,7 +2794,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 129 "awkgram.y"
-    { --inloop; (yyval.p) = stat3(IN, (yyvsp[(3) - (8)].p), makearr((yyvsp[(5) - (8)].p)), (yyvsp[(8) - (8)].p)); }
+    { --inloop; (yyval.p) = stat3(TOKEN_IN, (yyvsp[(3) - (8)].p), makearr((yyvsp[(5) - (8)].p)), (yyvsp[(8) - (8)].p)); }
     break;
 
   case 20:
@@ -3108,7 +3108,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 241 "awkgram.y"
-    { 
+    {
 			if (safe) SYNTAX("cmd | getline is unsafe");
 			else (yyval.p) = op3(GETLINE, (yyvsp[(4) - (4)].p), itonp((yyvsp[(2) - (4)].i)), (yyvsp[(1) - (4)].p)); }
     break;
@@ -3117,7 +3117,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 244 "awkgram.y"
-    { 
+    {
 			if (safe) SYNTAX("cmd | getline is unsafe");
 			else (yyval.p) = op3(GETLINE, (Node*)0, itonp((yyvsp[(2) - (3)].i)), (yyvsp[(1) - (3)].p)); }
     break;
@@ -3196,7 +3196,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 295 "awkgram.y"
-    { 
+    {
 			if (safe) SYNTAX("print | is unsafe");
 			else (yyval.p) = stat3((yyvsp[(1) - (4)].i), (yyvsp[(2) - (4)].p), itonp((yyvsp[(3) - (4)].i)), (yyvsp[(4) - (4)].p)); }
     break;
@@ -3230,14 +3230,14 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 305 "awkgram.y"
-    { (yyval.p) = stat2(DELETE, makearr((yyvsp[(2) - (5)].p)), (yyvsp[(4) - (5)].p)); }
+    { (yyval.p) = stat2(TOKEN_DELETE, makearr((yyvsp[(2) - (5)].p)), (yyvsp[(4) - (5)].p)); }
     break;
 
   case 105:
 
 /* Line 1464 of yacc.c  */
 #line 306 "awkgram.y"
-    { (yyval.p) = stat2(DELETE, makearr((yyvsp[(2) - (2)].p)), 0); }
+    { (yyval.p) = stat2(TOKEN_DELETE, makearr((yyvsp[(2) - (2)].p)), 0); }
     break;
 
   case 106:

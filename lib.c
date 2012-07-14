@@ -145,7 +145,7 @@ int getrec(char **pbuf, int *pbufsize, int isrecord)	/* get next input record */
 			   dprintf( ("opening file %s\n", file) );
 			if (*file == '-' && *(file+1) == '\0')
 				infile = stdin;
-			else if ((infile = fopen(file, "r")) == NULL)
+			else if ((infile = ufopen(file, "r")) == NULL)
 				FATAL("can't open file %s", file);
 			setfval(fnrloc, 0.0);
 		}
@@ -461,7 +461,7 @@ int refldbld(const char *rec, const char *fs)	/* build fields from reg expr in F
 			break;
 		}
 	}
-	return i;		
+	return i;
 }
 
 void recbld(void)	/* create $0 from $1..$NF if necessary */

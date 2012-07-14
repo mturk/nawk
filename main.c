@@ -22,9 +22,38 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-const char	*version = "version 20110810 (RedHat)";
+const char	*version = "version 2012.07.14 (RedHat)";
+#if defined(_MSC_VER)
+#pragma warning(push, 3)
+/*
+ * disable or reduce the frequency of...
+ *   C4057: indirection to slightly different base types
+ *   C4075: slight indirection changes (unsigned short* vs short[])
+ *   C4100: unreferenced formal parameter
+ *   C4127: conditional expression is constant
+ *   C4163: '_rotl64' : not available as an intrinsic function
+ *   C4201: nonstandard extension nameless struct/unions
+ *   C4244: int to char/short - precision loss
+ *   C4514: unreferenced inline function removed
+ */
+#pragma warning(disable: 4100 4127 4163 4201 4514; once: 4057 4075 4244)
+
+/*
+ * Ignore Microsoft's interpretation of secure development
+ * and the POSIX string handling API
+ */
+#define _CRT_SECURE_NO_DEPRECATE
+#define WIN32_LEAN_AND_MEAN
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0502
+#endif
+#endif
+#if !defined(UNICODE)
+#define UNICODE
+#endif
 
 #define DEBUG
+#include <windows.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <locale.h>
@@ -53,10 +82,16 @@ int	curpfile = 0;	/* current filename */
 
 int	safe	= 0;	/* 1 => "safe" mode */
 
-int main(int argc, char *argv[])
+int wmain(int argc, const wchar_t **wargv, const wchar_t **wenv)
 {
 	const char *fs = NULL;
+    int i;
+    char **argv;
 
+    argv = (char **)xmalloc((argc + 1) * sizeof(char *));
+    for (i = 0; i < argc; i++) {
+        argv[i] = xucsdup(wargv[i]);
+    }
 	setlocale(LC_ALL, "");
 	setlocale(LC_NUMERIC, "C"); /* for parsing cmdline & prog */
 	cmdname = argv[0];
@@ -84,14 +119,14 @@ int main(int argc, char *argv[])
 		case 'f':	/* next argument is program filename */
 			if (argv[1][2] != 0) {  /* arg is -fsomething */
 				if (npfile >= MAX_PFILE - 1)
-					FATAL("too many -f options"); 
+					FATAL("too many -f options");
 				pfile[npfile++] = &argv[1][2];
 			} else {		/* arg is -f something */
 				argc--; argv++;
 				if (argc <= 1)
 					FATAL("no program filename");
 				if (npfile >= MAX_PFILE - 1)
-					FATAL("too many -f options"); 
+					FATAL("too many -f options");
 				pfile[npfile++] = argv[1];
 			}
 			break;
@@ -187,7 +222,7 @@ int pgetc(void)		/* get 1 character from awk program */
 				return EOF;
 			if (strcmp(pfile[curpfile], "-") == 0)
 				yyin = stdin;
-			else if ((yyin = fopen(pfile[curpfile], "r")) == NULL)
+			else if ((yyin = ufopen(pfile[curpfile], "r")) == NULL)
 				FATAL("can't open file %s", pfile[curpfile]);
 			lineno = 1;
 		}

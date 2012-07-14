@@ -43,7 +43,7 @@ THIS SOFTWARE.
 #define right(v)	(v)->narg[1]
 #define parent(v)	(v)->nnext
 
-#define LEAF	case CCL: case NCCL: case CHAR: case DOT: case FINAL: case ALL:
+#define LEAF	case CCL: case NCCL: case TOKEN_CHAR: case DOT: case FINAL: case ALL:
 #define ELEAF	case EMPTYRE:		/* empty string in regexp */
 #define UNARY	case STAR: case PLUS: case QUEST:
 
@@ -156,7 +156,7 @@ int makeinit(fa *f, int anchor)
 	f->out[2] = 0;
 	f->reset = 0;
 	k = *(f->re[0].lfollow);
-	xfree(f->posns[2]);			
+	xfree(f->posns[2]);
 	if ((f->posns[2] = (int *) calloc(k+1, sizeof(int))) == NULL)
 		overflo("out of space in makeinit");
 	for (i=0; i <= k; i++) {
@@ -530,7 +530,7 @@ int pmatch(fa *f, const char *p0)	/* longest match, for sub */
 		if (f->reset) {
 			for (i = 2; i <= f->curstat; i++)
 				xfree(f->posns[i]);
-			k = *f->posns[0];			
+			k = *f->posns[0];
 			if ((f->posns[2] = (int *) calloc(k+1, sizeof(int))) == NULL)
 				overflo("out of space in pmatch");
 			for (i = 0; i <= k; i++)
@@ -587,7 +587,7 @@ int nematch(fa *f, const char *p0)	/* non-empty match, for sub */
 		if (f->reset) {
 			for (i = 2; i <= f->curstat; i++)
 				xfree(f->posns[i]);
-			k = *f->posns[0];			
+			k = *f->posns[0];
 			if ((f->posns[2] = (int *) calloc(k+1, sizeof(int))) == NULL)
 				overflo("out of state space");
 			for (i = 0; i <= k; i++)
@@ -630,8 +630,8 @@ Node *primary(void)
 	Node *np;
 
 	switch (rtok) {
-	case CHAR:
-		np = op2(CHAR, NIL, itonp(rlxval));
+	case TOKEN_CHAR:
+		np = op2(TOKEN_CHAR, NIL, itonp(rlxval));
 		rtok = relex();
 		return (unary(np));
 	case ALL:
@@ -653,10 +653,10 @@ Node *primary(void)
 		return (unary(np));
 	case '^':
 		rtok = relex();
-		return (unary(op2(CHAR, NIL, itonp(HAT))));
+		return (unary(op2(TOKEN_CHAR, NIL, itonp(HAT))));
 	case '$':
 		rtok = relex();
-		return (unary(op2(CHAR, NIL, NIL)));
+		return (unary(op2(TOKEN_CHAR, NIL, NIL)));
 	case '(':
 		rtok = relex();
 		if (rtok == ')') {	/* special pleading for () */
@@ -679,7 +679,7 @@ Node *primary(void)
 Node *concat(Node *np)
 {
 	switch (rtok) {
-	case CHAR: case DOT: case ALL: case EMPTYRE: case CCL: case NCCL: case '$': case '(':
+	case TOKEN_CHAR: case DOT: case ALL: case EMPTYRE: case CCL: case NCCL: case '$': case '(':
 		return (concat(op2(CAT, np, primary())));
 	}
 	return (np);
@@ -789,11 +789,11 @@ int relex(void)		/* lexical analyzer for reparse */
 		return c;
 	case '\\':
 		rlxval = quoted(&prestr);
-		return CHAR;
+		return TOKEN_CHAR;
 	default:
 		rlxval = c;
-		return CHAR;
-	case '[': 
+		return TOKEN_CHAR;
+	case '[':
 		if (buf == 0 && (buf = (uschar *) malloc(bufsz)) == NULL)
 			FATAL("out of space in reg expr %.10s..", lastre);
 		bp = buf;
@@ -869,7 +869,7 @@ int cgoto(fa *f, int s, int c)
 	p = f->posns[s];
 	for (i = 1; i <= *p; i++) {
 		if ((k = f->re[p[i]].ltype) != FINAL) {
-			if ((k == CHAR && c == ptoi(f->re[p[i]].lval.np))
+			if ((k == TOKEN_CHAR && c == ptoi(f->re[p[i]].lval.np))
 			 || (k == DOT && c != 0 && c != HAT)
 			 || (k == ALL && c != 0)
 			 || (k == EMPTYRE && c != 0)
