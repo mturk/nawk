@@ -116,42 +116,32 @@ void xfree(void *m)
 char *xucsdup(const wchar_t *wcs)
 {
     char *mbs;
-    int cch = WideCharToMultiByte(CP_ACP, 0, wcs, -1, 0, 0, 0, 0);
+    int cch = WideCharToMultiByte(CP_UTF8, 0, wcs, -1, 0, 0, 0, 0);
     if (cch == 0)
         return NULL;
     mbs = (char *)xmalloc(cch);
-    WideCharToMultiByte(CP_ACP, 0, wcs, -1, mbs, cch, 0, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wcs, -1, mbs, cch, 0, 0);
     return mbs;
 }
 
 FILE *ufopen(const char *f, const char *m)
 {
-    FILE *fd;
     wchar_t wf[8192];
     wchar_t wm[64];
     if (MultiByteToWideChar(CP_UTF8, 0, f, -1, wf, 8192) == 0)
-        goto ansi;
+        return NULL;
     if (MultiByteToWideChar(CP_UTF8, 0, m, -1, wm, 64) == 0)
-        goto ansi;
-    fd = _wfopen(wf, wm);
-    if (fd != NULL)
-        return fd;
-ansi:
-    return _popen(f, m);
+        return NULL;
+    return _wfopen(wf, wm);
 }
 
 FILE *upopen(const char *f, const char *m)
 {
-    FILE *fd;
     wchar_t wf[8192];
     wchar_t wm[64];
     if (MultiByteToWideChar(CP_UTF8, 0, f, -1, wf, 8192) == 0)
-        goto ansi;
+        return NULL;
     if (MultiByteToWideChar(CP_UTF8, 0, m, -1, wm, 64) == 0)
-        goto ansi;
-    fd = _wpopen(wf, wm);
-    if (fd != NULL)
-        return fd;
-ansi:
-    return fopen(f, m);
+        return NULL;
+    return _wpopen(wf, wm);
 }
