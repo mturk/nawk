@@ -1,6 +1,8 @@
-/* popen and pclose are not part of win 95 and nt,
-   but it appears that _popen and _pclose "work".
-   if this won't load, use the return NULL statements. */
+/**
+  popen and pclose are not part of win 95 and nt,
+  but it appears that _popen and _pclose "work".
+  if this won't load, use the return NULL statements.
+*/
 
 #include <windows.h>
 #include <stdio.h>
@@ -71,7 +73,17 @@ void *xmalloc(size_t size)
 {
     void *p = calloc(size, 1);
     if (p == 0) {
-        _wperror(L"malloc");
+        perror("malloc");
+        exit(1);
+    }
+    return p;
+}
+
+void *xcalloc(size_t number, size_t size)
+{
+    void *p = calloc(number, size);
+    if (p == 0) {
+        perror("calloc");
         exit(1);
     }
     return p;
@@ -94,24 +106,18 @@ char *xucsdup(const wchar_t *wcs)
     return mbs;
 }
 
-FILE *ufopen(const char *f, const char *m)
+FILE *ufopen(const char *f, const wchar_t *m)
 {
     wchar_t wf[8192];
-    wchar_t wm[64];
     if (MultiByteToWideChar(CP_UTF8, 0, f, -1, wf, 8192) == 0)
         return NULL;
-    if (MultiByteToWideChar(CP_UTF8, 0, m, -1, wm, 64) == 0)
-        return NULL;
-    return _wfopen(wf, wm);
+    return _wfopen(wf, m);
 }
 
-FILE *upopen(const char *f, const char *m)
+FILE *upopen(const char *f, const wchar_t *m)
 {
     wchar_t wf[8192];
-    wchar_t wm[64];
     if (MultiByteToWideChar(CP_UTF8, 0, f, -1, wf, 8192) == 0)
         return NULL;
-    if (MultiByteToWideChar(CP_UTF8, 0, m, -1, wm, 64) == 0)
-        return NULL;
-    return _wpopen(wf, wm);
+    return _wpopen(wf, m);
 }

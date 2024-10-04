@@ -236,7 +236,7 @@ Cell *call(Node **a, int n)	/* function call.  very kludgy and fragile */
 	if (!isfcn(fcn))
 		FATAL("calling undefined function %s", s);
 	if (frame == NULL) {
-		fp = frame = (struct Frame *) calloc(nframe += 100, sizeof(struct Frame));
+		fp = frame = (struct Frame *) xcalloc(nframe += 100, sizeof(struct Frame));
 		if (frame == NULL)
 			FATAL("out of space for stack frames calling %s", s);
 	}
@@ -696,7 +696,7 @@ Cell *gettemp(void)	/* get a tempcell */
 	Cell *x;
 
 	if (!tmps) {
-		tmps = (Cell *) calloc(100, sizeof(Cell));
+		tmps = (Cell *) xcalloc(100, sizeof(Cell));
 		if (!tmps)
 			FATAL("out of space for temporaries");
 		for(i = 1; i < 100; i++)
@@ -1707,7 +1707,7 @@ int nfiles;
 void stdinit(void)	/* in case stdin, etc., are not constants */
 {
 	nfiles = FOPEN_MAX;
-	files = calloc(nfiles, sizeof(*files));
+	files = xcalloc(nfiles, sizeof(*files));
 	if (files == NULL)
 		FATAL("can't allocate file memory for %u files", nfiles);
         files[0].fp = stdin;
@@ -1755,16 +1755,16 @@ FILE *openfile(int a, const char *us)
 	fflush(stdout);	/* force a semblance of order */
 	m = a;
 	if (a == GT) {
-		fp = ufopen(s, "w");
+		fp = ufopen(s, L"w");
 	} else if (a == APPEND) {
-		fp = ufopen(s, "a");
+		fp = ufopen(s, L"a");
 		m = GT;	/* so can mix > and >> */
 	} else if (a == '|') {	/* output pipe */
-		fp = upopen(s, "w");
+		fp = upopen(s, L"w");
 	} else if (a == LE) {	/* input pipe */
-		fp = upopen(s, "r");
+		fp = upopen(s, L"r");
 	} else if (a == LT) {	/* getline <file */
-		fp = strcmp(s, "-") == 0 ? stdin : ufopen(s, "r");	/* "-" is stdin */
+		fp = strcmp(s, "-") == 0 ? stdin : ufopen(s, L"r");	/* "-" is stdin */
 	} else	/* can't happen */
 		FATAL("illegal redirection %d", a);
 	if (fp != NULL) {
@@ -1853,7 +1853,7 @@ Cell *sub(Node **a, int nnn)	/* substitute command */
 	fa *pfa;
 	int bufsz = recsize;
 
-	if ((buf = (char *) malloc(bufsz)) == NULL)
+	if ((buf = (char *) xmalloc(bufsz)) == NULL)
 		FATAL("out of memory in sub");
 	x = execute(a[3]);	/* target string */
 	t = getsval(x);
@@ -1901,7 +1901,7 @@ Cell *sub(Node **a, int nnn)	/* substitute command */
 	}
 	tempfree(x);
 	tempfree(y);
-	free(buf);
+	xfree(buf);
 	return result;
 }
 
@@ -2002,7 +2002,7 @@ Cell *gsub(Node **a, int nnn)	/* global substitute */
 	x = gettemp();
 	x->tval = NUM;
 	x->fval = num;
-	free(buf);
+	xfree(buf);
 	return(x);
 }
 

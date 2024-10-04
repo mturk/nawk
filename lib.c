@@ -28,9 +28,8 @@ THIS SOFTWARE.
 #include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#if defined(_WIN32)
-# include <io.h>
-#endif
+#include <io.h>
+
 #include "awk.h"
 #include "ytab.h"
 
@@ -59,10 +58,10 @@ static Cell dollar1 = { OCELL, CFLD, NULL, "", 0.0, FLD|STR|DONTFREE };
 
 void recinit(unsigned int n)
 {
-	if ( (record = (char *) malloc(n)) == NULL
-	  || (fields = (char *) malloc(n+1)) == NULL
-	  || (fldtab = (Cell **) calloc(nfields+1, sizeof(Cell *))) == NULL
-	  || (fldtab[0] = (Cell *) malloc(sizeof(Cell))) == NULL )
+	if ( (record = (char *) xmalloc(n)) == NULL
+	  || (fields = (char *) xmalloc(n+1)) == NULL
+	  || (fldtab = (Cell **) xcalloc(nfields+1, sizeof(Cell *))) == NULL
+	  || (fldtab[0] = (Cell *) xmalloc(sizeof(Cell))) == NULL )
 		FATAL("out of space for $0 and fields");
 	*fldtab[0] = dollar0;
 	fldtab[0]->sval = record;
@@ -144,7 +143,7 @@ int getrec(char **pbuf, int *pbufsize, int isrecord)	/* get next input record */
 			   dprintf( ("opening file %s\n", file) );
 			if (*file == '-' && *(file+1) == '\0')
 				infile = stdin;
-			else if ((infile = ufopen(file, "r")) == NULL)
+			else if ((infile = ufopen(file, L"r")) == NULL)
 				FATAL("can't open file %s", file);
 			setfval(fnrloc, 0.0);
 		}

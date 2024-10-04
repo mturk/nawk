@@ -193,7 +193,7 @@ int pgetc(void)		/* get 1 character from awk program */
 				return EOF;
 			if (strcmp(pfile[curpfile], "-") == 0)
 				yyin = stdin;
-			else if ((yyin = ufopen(pfile[curpfile], "r")) == NULL)
+			else if ((yyin = ufopen(pfile[curpfile], L"r")) == NULL)
 				FATAL("can't open file %s", pfile[curpfile]);
 			lineno = 1;
 		}
