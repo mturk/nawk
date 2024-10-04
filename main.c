@@ -22,37 +22,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-const char	*version = "version 2012.07.14 (RedHat)";
-#if defined(_MSC_VER)
-#pragma warning(push, 3)
-/*
- * disable or reduce the frequency of...
- *   C4057: indirection to slightly different base types
- *   C4075: slight indirection changes (unsigned short* vs short[])
- *   C4100: unreferenced formal parameter
- *   C4127: conditional expression is constant
- *   C4163: '_rotl64' : not available as an intrinsic function
- *   C4201: nonstandard extension nameless struct/unions
- *   C4244: int to char/short - precision loss
- *   C4514: unreferenced inline function removed
- */
-#pragma warning(disable: 4100 4127 4163 4201 4514; once: 4057 4075 4244)
+const char	*version = "version 2024.08.05";
 
-/*
- * Ignore Microsoft's interpretation of secure development
- * and the POSIX string handling API
- */
-#define _CRT_SECURE_NO_DEPRECATE
-#define WIN32_LEAN_AND_MEAN
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0502
-#endif
-#endif
-#if !defined(UNICODE)
-#define UNICODE
-#endif
-
-#define DEBUG
 #include <windows.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -82,7 +53,7 @@ int	curpfile = 0;	/* current filename */
 
 int	safe	= 0;	/* 1 => "safe" mode */
 
-int wmain(int argc, const wchar_t **wargv, const wchar_t **wenv)
+int wmain(int argc, const wchar_t **wargv)
 {
 	const char *fs = NULL;
     int i;
@@ -166,10 +137,10 @@ int wmain(int argc, const wchar_t **wargv, const wchar_t **wenv)
 			dbg = atoi(&argv[1][2]);
 			if (dbg == 0)
 				dbg = 1;
-			printf("awk %s\n", version);
+			printf("nawk %s\n", version);
 			break;
 		case 'V':	/* added for exptools "standard" */
-			printf("awk %s\n", version);
+			printf("nawk %s\n", version);
 			exit(0);
 			break;
 		default:

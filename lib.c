@@ -22,7 +22,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-#define DEBUG
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -535,30 +534,30 @@ void fpecatch(int sig)
 	char buf[1024];
 
 	snprintf(buf, sizeof buf, "floating point exception\n");
-	write(STDERR_FILENO, buf, strlen(buf));
+	_write(STDERR_FILENO, buf, strlen(buf));
 
 	if (compile_time != 2 && NR && *NR > 0) {
 		snprintf(buf, sizeof buf, " input record number %d", (int) (*FNR));
-		write(STDERR_FILENO, buf, strlen(buf));
+		_write(STDERR_FILENO, buf, strlen(buf));
 
 		if (strcmp(*FILENAME, "-") != 0) {
 			snprintf(buf, sizeof buf, ", file %s", *FILENAME);
-			write(STDERR_FILENO, buf, strlen(buf));
+			_write(STDERR_FILENO, buf, strlen(buf));
 		}
-		write(STDERR_FILENO, "\n", 1);
+		_write(STDERR_FILENO, "\n", 1);
 	}
 	if (compile_time != 2 && curnode) {
 		snprintf(buf, sizeof buf, " source line number %d", curnode->lineno);
-		write(STDERR_FILENO, buf, strlen(buf));
+		_write(STDERR_FILENO, buf, strlen(buf));
 	} else if (compile_time != 2 && lineno) {
 		snprintf(buf, sizeof buf, " source line number %d", lineno);
-		write(STDERR_FILENO, buf, strlen(buf));
+		_write(STDERR_FILENO, buf, strlen(buf));
 	}
 	if (compile_time == 1 && cursource() != NULL) {
 		snprintf(buf, sizeof buf, " source file %s", cursource());
-		write(STDERR_FILENO, buf, strlen(buf));
+		_write(STDERR_FILENO, buf, strlen(buf));
 	}
-	write(STDERR_FILENO, "\n", 1);
+	_write(STDERR_FILENO, "\n", 1);
 	if (dbg > 1)		/* core dump if serious debugging on */
 		abort();
 	_exit(1);

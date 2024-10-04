@@ -2,36 +2,6 @@
    but it appears that _popen and _pclose "work".
    if this won't load, use the return NULL statements. */
 
-#if defined(_MSC_VER)
-#pragma warning(push, 3)
-/*
- * disable or reduce the frequency of...
- *   C4057: indirection to slightly different base types
- *   C4075: slight indirection changes (unsigned short* vs short[])
- *   C4100: unreferenced formal parameter
- *   C4127: conditional expression is constant
- *   C4163: '_rotl64' : not available as an intrinsic function
- *   C4201: nonstandard extension nameless struct/unions
- *   C4244: int to char/short - precision loss
- *   C4514: unreferenced inline function removed
- */
-#pragma warning(disable: 4100 4127 4163 4201 4514; once: 4057 4075 4244)
-
-/*
- * Ignore Microsoft's interpretation of secure development
- * and the POSIX string handling API
- */
-#define _CRT_SECURE_NO_DEPRECATE
-#define WIN32_LEAN_AND_MEAN
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0502
-#endif
-#endif
-#if !defined(UNICODE)
-#define UNICODE
-#endif
-
-#define DEBUG
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>

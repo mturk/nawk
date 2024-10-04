@@ -22,7 +22,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-#define DEBUG
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -267,10 +266,10 @@ int isarg(const char *s)		/* is s in argument list for current function? */
 
 int ptoi(void *p)	/* convert pointer to integer */
 {
-	return (int) (long) p;	/* swearing that p fits, of course */
+	return (int) (uintptr_t) p;	/* swearing that p fits, of course */
 }
 
 Node *itonp(int i)	/* and vice versa */
 {
-	return (Node *) (long) i;
+	return (Node *) (uintptr_t) i;
 }

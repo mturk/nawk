@@ -22,7 +22,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-#define	DEBUG
 #include <stdio.h>
 #include <math.h>
 #include <ctype.h>
@@ -381,7 +380,7 @@ static char *get_str_val(Cell *vp, char **fmt)        /* get string val of a Cel
 			n = snprintf(s, sizeof(s), *fmt, vp->fval);
 		if (n == -1)
 			FATAL("out of space in get_str_val");
-		vp->sval = strdup(s);
+		vp->sval = _strdup(s);
 		vp->tval &= ~DONTFREE;
 		vp->tval |= STR;
 	}
@@ -405,7 +404,7 @@ char *tostring(const char *s)	/* make a copy of string s */
 {
 	char *p;
 
-	p = strdup(s);
+	p = _strdup(s);
 	if (p == NULL)
 		FATAL("out of space in tostring on %s", s);
 	return p;
