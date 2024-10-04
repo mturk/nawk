@@ -35,7 +35,6 @@
 #define STR_VERISON         "2024.08.05.0"
 #define CSV_VERISON         2024,8,5,0
 
-IDI_MAINICON ICON           "nawk.ico"
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST  "nawk.manifest"
 
 1 VERSIONINFO
