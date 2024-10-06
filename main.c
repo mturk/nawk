@@ -22,7 +22,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-const char	*version = "version 2024.08.05";
+const char	*version = "version 2024.10.07";
 
 #include <windows.h>
 #include <stdio.h>

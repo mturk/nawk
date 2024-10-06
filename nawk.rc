@@ -32,8 +32,8 @@
 #define STR_PRODUCT         "nawk"
 #define STR_COMPANY         "Acme Corporation."
 #define STR_DESCRIPTION     "Nawk: pattern scanning and text processing language"
-#define STR_VERISON         "2024.08.05.0"
-#define CSV_VERISON         2024,8,5,0
+#define STR_VERISON         "2024.10.07.0"
+#define CSV_VERISON         2024,10,7,0
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST  "nawk.manifest"
 
